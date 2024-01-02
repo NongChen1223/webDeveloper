@@ -1,0 +1,29 @@
+.tab-box{
+    width: 800px;
+    height: 500px;
+    border: 1px solid #ee0e0e;
+    margin: 100px auto;
+}
+.tab-nav{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #ee0e0e;
+}
+.tab-nav-ul{
+    display: flex;
+    flex: 1;
+}
+.tab-nav-ul >li{
+    width: 130px;
+}
+.tab-nav .tab-add{
+  
+}
+.tab-nav-ul .actice-nav{
+    background-color: #ee0e0e;
+    color: #000;
+}
+.tav-content .actice-content{
+    display: block;
+}
