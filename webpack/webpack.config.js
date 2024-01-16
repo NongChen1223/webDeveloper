@@ -17,6 +17,9 @@ module.exports = {
         filename:"app.js"
     },
     devtool:"scource-map",
+    resolveLoader:{
+        modules:['node_modules',resolve(__dirname,'loaders')]
+    },
     module:{
         rules:[{
             test:/\.tpl$/,

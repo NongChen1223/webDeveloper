@@ -1,0 +1,1 @@
+在Webpack中，resolveLoader是用来配置Webpack解析加载器（loader）模块的选项。它允许你指定Webpack在解析加载器模块时应该搜索的目录
