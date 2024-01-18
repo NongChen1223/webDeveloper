@@ -2,7 +2,7 @@ const { tplReplace } = require('../utils')
 function tplLoader(source){
     source = source.replace(/\s+/g,'') //去掉空格
     // return source;
-    console.log('source !!!!',source)
+    console.log('source 11!!!!',source)
 
     return `
     export default (options)=>{
