@@ -27,7 +27,7 @@ import  { Web3 } from  'web3'
 
         const balance = await  usdtContract.methods.balanceOf(address).call()
         console.log('获取余额',balance)
-        console.log('balance',web3.utils.fromWei(balance, decimals))
+        console.log('balance',web3.utils.fromWei(balance, 'ether'))
 
     }catch (err){
         console.log('Web3.JS 报错！！',err)
