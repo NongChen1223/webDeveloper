@@ -39,5 +39,5 @@ function twoSumHash(nums: number[], target: number): number[] {
     return []
 }
 console.log(twoSumHash([3, 2, 4], 6))
-
+console.log('1111')
 // con sole.log(twoSumFor(nums,9))
