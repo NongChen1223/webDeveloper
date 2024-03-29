@@ -1,5 +1,10 @@
-type  TokensType = Record<"name"| "address",string>;
-type PutType = Record<"name"| "type",string>;
+type  TokensType = Record<"name" | "address" | "symbol", string>;
+type  PutType = Record<"name" | "type", string>;
+type  BlanceListType = {
+    name:string,
+    balance:number
+}
+
 interface BalanceOfInterface {
     constant: boolean;
     inputs: PutType[];
@@ -13,5 +18,6 @@ interface BalanceOfInterface {
 export type {
     TokensType,
     PutType,
-    BalanceOfInterface
+    BalanceOfInterface,
+    BlanceListType
 }
