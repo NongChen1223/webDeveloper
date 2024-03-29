@@ -178,12 +178,51 @@ async function getBatchRequest() {
         const web3 = new Web3(ETH_RPC_URL);
         const link_address = '0x514910771af9ca656af840dff83e8264ecf986ca';
         const Contract = new web3.eth.Contract(LINK_ABI, link_address);
+        const Contract1 = new web3.eth.Contract(LINK_ABI, '0x6b175474e89094c44da98b954eedeac495271d0f');
+        const jsonRpc1 = {
+            jsonrpc: '2.0',
+            id: 1,
+            method: 'eth_call',
+            params: [{
+                form:"0x514910771af9ca656af840dff83e8264ecf986ca",
+                to: link_address,
+                data: Contract.methods.balanceOf('0x2BE3d3a38c6C5Ac27cA2c2DabE6A354b599c4E09').encodeABI()
+            }, 'latest']
+        }
+        const jsonRpc2 = {
+            jsonrpc: '2.0',
+            id: 2,
+            method: 'eth_call',
+            params: [{
+                form:"0x514910771af9ca656af840dff83e8264ecf986ca",
+                to: '0x6b175474e89094c44da98b954eedeac495271d0f', //DAI
+                data: Contract1.methods.balanceOf('0x2BE3d3a38c6C5Ac27cA2c2DabE6A354b599c4E09').encodeABI()
+            }, 'latest']
+        }
+        // console.log('1312')
         const batch = new web3.BatchRequest()
-        const reqList = []
-        // reqList.push()
-        batch.add(Contract.methods.balanceOf(wallet_address).call().request({}))
-        batch.execute()
 
+        // Contract.methods.balanceOf(wallet_address)
+        // reqList.push()
+        batch.add(jsonRpc1)
+        batch.add(jsonRpc2)
+        const a =  await batch.execute()
+        // console.log('返回批量请求',a)
+        a.forEach((item, index) => {
+            console.log('批量请求', item)
+            if (index === 0) {
+                console.log('LINK', web3.utils.fromWei(BigInt(item.result), 'ether'))
+            } else {
+                console.log('DAI', web3.utils.fromWei(BigInt(item.result), 'ether'))
+            }
+        })
+        // a.then(res=>{
+        //     console.log('res',res)
+        //     const a1 = res[0].result
+        //     // const a2 = res[1].result
+        //     console.log('LINK',web3.utils.fromWei(BigInt(a1), 'ether') )
+        //     // console.log('DAI ',web3.utils.fromWei(BigInt(a2), 'ether') )
+        // })
     } catch
         (err) {
         console.log('批量请求失败', err)
