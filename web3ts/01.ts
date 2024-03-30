@@ -199,11 +199,7 @@ async function getBatchRequest() {
                 data: Contract1.methods.balanceOf('0x2BE3d3a38c6C5Ac27cA2c2DabE6A354b599c4E09').encodeABI()
             }, 'latest']
         }
-        // console.log('1312')
         const batch = new web3.BatchRequest()
-
-        // Contract.methods.balanceOf(wallet_address)
-        // reqList.push()
         batch.add(jsonRpc1)
         batch.add(jsonRpc2)
         const a =  await batch.execute()
@@ -216,13 +212,6 @@ async function getBatchRequest() {
                 console.log('DAI', web3.utils.fromWei(BigInt(item.result), 'ether'))
             }
         })
-        // a.then(res=>{
-        //     console.log('res',res)
-        //     const a1 = res[0].result
-        //     // const a2 = res[1].result
-        //     console.log('LINK',web3.utils.fromWei(BigInt(a1), 'ether') )
-        //     // console.log('DAI ',web3.utils.fromWei(BigInt(a2), 'ether') )
-        // })
     } catch
         (err) {
         console.log('批量请求失败', err)
