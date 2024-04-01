@@ -5,7 +5,7 @@ type  BlanceListType = {
     balance:number
 }
 
-type JsonRpcParams = Record<"form" | "to" | "data">
+type JsonRpcParams = Record<"form" | "to" | "data",string>
 type AbiEntry = AbiFunction | AbiEvent | AbiFallback;
 interface BalanceOfInterface {
     constant: boolean;
@@ -51,10 +51,12 @@ interface JsonRpcRequestBody {
     id: number;
     jsonrpc: string;
     method: string;
-    params: any[];
+    params: JsonRpcParams[];
 }
-interface JsonRpcParams {
-
+interface BatchResponse {
+    jsonrpc: string;
+    id: number;
+    result: string;
 }
 
 export type {
@@ -62,5 +64,7 @@ export type {
     PutType,
     BalanceOfInterface,
     BlanceListType,
-    AbiEntry
+    AbiEntry,
+    JsonRpcRequestBody,
+    BatchResponse
 }
