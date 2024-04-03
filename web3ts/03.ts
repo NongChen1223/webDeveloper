@@ -2,7 +2,7 @@ import Web3 from "web3";
 import { ERC20ABI, Tokens } from "./data/TokenABI";
 import { JsonRpcOptionalRequest, JsonRpcBatchResponse,JsonRpcResult } from 'web3-types';
 const ETH_RPC_URL = "https://eth-mainnet.alchemyapi.io/v2/R6mZwt31pb4DdV4cAriiPoxHYJhKcKVa";
-const WALLET_ADDRESS = "0x2BE3d3a38c6C5Ac27cA2c2DabE6A354b599c4E09";
+const WALLET_ADDRESS = "0xdD831352762e9de7ad5a264990e1bB9F87A6Fc21";
 const web3 = new Web3(ETH_RPC_URL);
 type TokensType = Record<"name" | "address" | "symbol", string>;
 interface RpcType {
