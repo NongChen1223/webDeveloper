@@ -114,9 +114,58 @@ const WETH = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
             }
           }
         }
+        v3批量查询结果
+        "pools": [
+              {
+                "id": "0x9ba3f47fe7f5a12562ba0a4a5645d8bf9ea1dd8e", 交易池ID
+                "token1Price": "0.000000000000000000000000000000002938956810142818059917450894998607", 1个WETH的价格 = 这些NEAR
+                "token0Price": "340256786540325233929710090404719.7", NEAR/WETH价格 1个ETH大约能换那么多的NEAR
+                "token0": {
+                  "id": "0x85f17cf997934a597031b2e18a9ab6ebd4b9f6a4",
+                  "name": "NEAR",
+                  "symbol": "NEAR"
+                },
+                "token1": {
+                  "id": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+                  "name": "Wrapped Ether",
+                  "symbol": "WETH"
+                }
+              }
+         ]
+
+        v3批量查询tokens信息 包括价格
+        {
+            usdt:token(
+                id:"0xdac17f958d2ee523a2206206994597c13d831ec7"
+                subgraphError: allow
+              ){
+                id
+                name
+                symbol
+                decimals
+                derivedETH
+              }
+              tokens(where: {id_in: [
+                "0xdac17f958d2ee523a2206206994597c13d831ec7",
+                "0xB8c77482e45F1F44dE1745F52C74426C631bDD52",
+                "0xae7ab96520de3a18e5e111b5eaab095312d7fe84",
+                "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                "0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE",
+                "0x582d872a1b094fc48f5de31d3b73f2d9be47def1",
+                "0x514910771af9ca656af840dff83e8264ecf986ca",
+                "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+              ]}){
+                id
+                symbol
+                decimals
+                derivedETH
+                poolCount
+                totalSupply
+              }
+       }
 }
 */
-//创建XXX/WETH的币对参数
+//创建XXX/WETH的币对请求query
 const createV2EthPair = (list: any) => {
     const query = `
     {
@@ -150,6 +199,7 @@ const getV2Graphql = async (query: string) => {
     })
     return res.data
 }
+//v3查询方法
 const getV3Graphql = async (query: string) => {
     const res = await post(UNISWAP_V3_URL, {
         query
@@ -265,7 +315,7 @@ const createPoolList = (pair: any) => {
     })
     return list
 }
-const getPairPriceList = async (poolObj: any, PairName: string = 'USDT'): Promise<any[]> => {
+const getV2PairPriceList = async (poolObj: any, PairName: string = 'USDT'):Promise<any[]> => {
     const list: any = []
     const {ethPrice} = await getUsdtAndEthPrice()
     Object.keys(poolObj).forEach(item => {
@@ -276,6 +326,21 @@ const getPairPriceList = async (poolObj: any, PairName: string = 'USDT'): Promis
                 address: pool.token0.id,//token0的币对地址
                 token: `${pool.token0.symbol}/${PairName}`,
                 price: ethPairPrice * ethPrice //换算USDT价格
+            })
+        }
+    })
+    return list
+}
+const getV3PairPriceList = async (poollist:any[],PairName: string = 'USDT'):Promise<any[]>=>{
+   const list:any[] = []
+    const {ethPrice} = await getUsdtAndEthPrice()
+    poollist.forEach((item,index)=>{
+        const ethPairPrice = Number(item?.token1Price)
+        if(ethPairPrice > 0){
+            list.push({
+                address:item.token0.id,
+                token:`${item.token0.symbol}/${PairName}`,
+                price:ethPairPrice * ethPrice
             })
         }
     })
@@ -297,15 +362,15 @@ const filtrationV2NoFind = (pairObj: any) => {
     return nofindList
 }
 //V3创建查询子图
-const createV3EthPair = (list:any[]) => {
+const createV3EthPair = (list: any[]) => {
     const query = `
     {
      pools(
         where: {
-          token1_: {
-            id_in:[${list.map(item=>`"${item.address}"`)}] 
+          token0_: {
+            id_in:[${list.map(item => `"${item.address}"`)}] 
           }
-          token0: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
+          token1: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
         }
      ) 
      {
@@ -325,28 +390,28 @@ const createV3EthPair = (list:any[]) => {
      }
     }
     `
-    console.log('打印V3 query',query)
     return query
 }
 //V3获取币对价格
-const v3getPairPrice = async (list:any) => {
+const v3getPairPrice = async (list: any) => {
     const query = await createV3EthPair(list)
     const res = await getV3Graphql(query)
-    console.log("v3 价格查询",res)
+    const v3PairPriceList = await getV3PairPriceList(res.pools)
+    console.log("v3 价格查询", v3PairPriceList)
+    return v3PairPriceList
 }
-const v2getPairPrice = async () => {
+const getPairPrice = async () => {
     const query = await createV2EthPair(Tokens) //创建币对查询pool
     const pairObject = await getV2Graphql(query) //获取到有币对池的对象
-    // console.log('V2有池', pairObject)
-    const nofindList = await filtrationV2NoFind(pairObject)
-    await v3getPairPrice(nofindList)
-    const poollist = await createPoolList(pairObject)
-    const poolPriceObject = await getPoolPrice(poollist)
-    const pairPriceList = await getPairPriceList(poolPriceObject)
-    console.log('币对价格', pairPriceList.length)
-    // console.log('v2查询币对 pairlist', pairlist)
+    const nofindList = await filtrationV2NoFind(pairObject) //过滤出V2查询不到的币
+    const poollist = await createPoolList(pairObject) //创建币对池ID列表
+    const poolPriceObject = await getPoolPrice(poollist) //通过池ID获取币对价格
+    const v2pairPriceList = await getV2PairPriceList(poolPriceObject) //换算USDT价格
+    const v3pairPriceList = await v3getPairPrice(nofindList) //v3查询价格
+    const pairPriceList = [...v2pairPriceList, ...v3pairPriceList]
+    console.log('币对价格', pairPriceList)
 }
-v2getPairPrice()
+getPairPrice()
 /*
   v2池查询交易对价格思路
   1.创建XXX/WETH的批量子图查询

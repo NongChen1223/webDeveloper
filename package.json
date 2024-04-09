@@ -6,8 +6,9 @@
   "type": "module",
   "scripts": {
     "test": "tsx ./web3ts/01.ts",
-    "test2": "tsx ./web3ts/02.ts",
-    "test3": "tsx ./uniswap/02.ts"
+    "test2": "tsx ./web3ts/03.ts",
+    "test3": "tsx ./uniswap/02.ts",
+    "test4": "tsx ./uniswap/04.ts"
   },
   "author": "",
   "license": "ISC",

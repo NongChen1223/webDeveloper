@@ -5,7 +5,6 @@ export function get<T>(url: string, params?: any, config?: AxiosRequestConfig): 
     return new Promise((resolve, reject) => {
         axios.get<T>(url, {...config, params})
             .then(response => resolve(response.data))
-            .catch(error => reject(error));
     });
 }
 
