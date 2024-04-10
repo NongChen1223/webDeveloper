@@ -1,5 +1,6 @@
 import axios, {AxiosRequestConfig} from 'axios';
 
+const HttpsProxyAgent = require("https-proxy-agent");
 // 封装 GET 方法
 export function get<T>(url: string, params?: any, config?: AxiosRequestConfig): Promise<T> {
     return new Promise((resolve, reject) => {

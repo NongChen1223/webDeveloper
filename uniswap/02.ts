@@ -400,8 +400,8 @@ const v3getPairPrice = async (list: any) => {
     console.log("v3 价格查询", v3PairPriceList)
     return v3PairPriceList
 }
-const getPairPrice = async () => {
-    const query = await createV2EthPair(Tokens) //创建币对查询pool
+const getPairPrice = async (list:any[]) => {
+    const query = await createV2EthPair(list) //创建币对查询pool
     const pairObject = await getV2Graphql(query) //获取到有币对池的对象
     const nofindList = await filtrationV2NoFind(pairObject) //过滤出V2查询不到的币
     const poollist = await createPoolList(pairObject) //创建币对池ID列表
@@ -411,7 +411,7 @@ const getPairPrice = async () => {
     const pairPriceList = [...v2pairPriceList, ...v3pairPriceList]
     console.log('币对价格', pairPriceList)
 }
-getPairPrice()
+getPairPrice(Tokens)
 /*
   v2池查询交易对价格思路
   1.创建XXX/WETH的批量子图查询
