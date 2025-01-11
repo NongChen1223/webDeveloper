@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+</head>
+
+<body>
+</body>
+<script>
+    const person = {
+        name: 'Alice',
+        age: 25
+    };
+
+    // 创建一个 Proxy 来代理 person 对象
+    const proxyPerson = new Proxy(person, {
+        // 拦截对属性的读取
+        get(target, prop) {
+            if (prop in target) {
+                console.log(`访问属性 ${prop}`);
+                return target[prop];  // 返回目标对象的属性值
+            } else {
+                console.log(`属性 ${prop} 不存在`);
+                return undefined;
+            }
+        },
+        // 拦截对属性的修改
+        set(target, prop, value) {
+            console.log("set方法 target:",target)
+            console.log("set方法 prop:",prop)
+            console.log(`修改属性 ${prop} 为 ${value}`);
+            target[prop] = value;  // 设置目标对象的属性值
+            // return true;  // 返回 true 表示操作成功
+        }
+    });
+
+    // 使用 Proxy 访问和修改对象
+    // console.log("proxyPerson",proxyPerson)
+    // person.age = 20
+    // console.log("proxyPerson.age",proxyPerson)
+    console.log("person",proxyPerson.age)
+    // proxyPerson.age = 26;  // 输出：修改属性 age 为 26
+    // console.log(proxyPerson.age);  // 输出：访问属性 age 26
+    // console.log(proxyPerson.address);  // 输出：属性 address 不存在
+
+</script>
+
+</html>

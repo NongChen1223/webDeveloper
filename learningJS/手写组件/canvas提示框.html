@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>Canvas 提示窗口示例</title>
+    <style>
+        /* 页面基础样式 */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            position: relative; /* 为绝对定位的提示窗口提供参考 */
+            height: 100vh; /* 视口高度 */
+            background-color: #f0f0f0;
+        }
+
+        /* Canvas 样式 */
+        #myCanvas {
+            border: 1px solid #ccc;
+            cursor: pointer;
+            background-color: #fff;
+        }
+
+        /* 提示窗口的容器 */
+        #tooltipContainer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none; /* 让提示窗口不阻碍 Canvas 的点击事件 */
+        }
+
+        /* 提示窗口样式 */
+        .tooltip {
+            position: absolute;
+            background-color: #fff;
+            border: 1px solid #333;
+            border-radius: 5px;
+            padding: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            width: 200px;
+            opacity: 0;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        /* 显示提示窗口 */
+        .tooltip.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* 小三角的通用样式 */
+        .tooltip::after {
+            content: "";
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-style: solid;
+        }
+
+        /* 三角指向下方 */
+        .tooltip.bottom::after {
+            top: -10px;
+            left: 20px;
+            border-width: 0 10px 10px 10px;
+            border-color: transparent transparent #333 transparent;
+        }
+
+        /* 三角指向上方 */
+        .tooltip.top::after {
+            bottom: -10px;
+            left: 20px;
+            border-width: 10px 10px 0 10px;
+            border-color: #333 transparent transparent transparent;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Canvas 提示窗口示例</h1>
+<canvas id="myCanvas" width="600" height="400"></canvas>
+<!-- 提示窗口容器 -->
+<div id="tooltipContainer"></div>
+
+<script>
+    // 获取 Canvas 元素和绘图上下文
+    const canvas = document.getElementById('myCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // 获取提示窗口的容器元素
+    const tooltipContainer = document.getElementById('tooltipContainer');
+
+    /**
+     * 绘制示例点在 Canvas 上
+     */
+    function drawPoints() {
+        const points = [
+            { x: 100, y: 100, color: 'blue' },
+            { x: 300, y: 200, color: 'green' },
+            { x: 500, y: 300, color: 'red' }
+        ];
+
+        points.forEach(point => {
+            ctx.fillStyle = point.color;
+            ctx.beginPath();
+            ctx.arc(point.x, point.y, 5, 0, Math.PI * 2);
+            ctx.fill();
+        });
+    }
+
+    // 初始绘制
+    drawPoints();
+
+    /**
+     * 根据点击坐标创建并显示提示窗口
+     * @param {number} x - 点击点的 x 坐标
+     * @param {number} y - 点击点的 y 坐标
+     * @param {string} message - 提示信息
+     */
+    function createTooltip(x, y, message) {
+        // 先移除任何现有的提示窗口
+        removeTooltip();
+
+        // 创建提示窗口元素
+        const tooltip = document.createElement('div');
+        tooltip.className = 'tooltip bottom'; // 默认指向下方
+        tooltip.innerHTML = `<strong>提示:</strong> ${message}`;
+
+        // 添加到提示窗口容器中
+        tooltipContainer.appendChild(tooltip);
+
+        // 获取 Canvas 在页面中的位置和尺寸
+        const canvasRect = canvas.getBoundingClientRect();
+
+        // 计算提示窗口的位置
+        const tooltipWidth = 200; // 与 CSS 中的宽度一致
+        const tooltipHeight = tooltip.offsetHeight;
+        const tooltipX = canvasRect.left + x - (tooltipWidth / 2);
+        let tooltipY = canvasRect.top + y + 10; // 默认在点击点下方
+
+        // 检查提示窗口是否超出视口高度，若超出则显示在点击点上方
+        if (tooltipY + tooltipHeight + 10 > window.innerHeight) {
+            tooltip.classList.remove('bottom');
+            tooltip.classList.add('top');
+            tooltipY = canvasRect.top + y - tooltipHeight - 10;
+        }
+
+        // 设置提示窗口的绝对位置
+        tooltip.style.left = `${tooltipX}px`;
+        tooltip.style.top = `${tooltipY}px`;
+
+        // 延时添加显示类，以触发 CSS 动画
+        requestAnimationFrame(() => {
+            tooltip.classList.add('show');
+        });
+    }
+
+    /**
+     * 移除现有的提示窗口
+     */
+    function removeTooltip() {
+        const existingTooltip = document.querySelector('.tooltip');
+        if (existingTooltip) {
+            // 移除显示类以触发淡出动画
+            existingTooltip.classList.remove('show');
+
+            // 在动画结束后从 DOM 中移除元素
+            existingTooltip.addEventListener('transitionend', () => {
+                if (existingTooltip.parentNode) {
+                    tooltipContainer.removeChild(existingTooltip);
+                }
+            }, { once: true }); // 确保事件只触发一次
+        }
+    }
+
+    /**
+     * 处理 Canvas 的点击事件
+     */
+    canvas.addEventListener('click', (event) => {
+        // 获取 Canvas 在页面中的位置
+        const canvasRect = canvas.getBoundingClientRect();
+
+        // 计算点击坐标相对于 Canvas 的位置
+        const x = event.clientX - canvasRect.left;
+        const y = event.clientY - canvasRect.top;
+
+        // 根据点击位置决定提示内容
+        let message = '';
+        if (Math.hypot(x - 100, y - 100) <= 5) {
+            message = '这是左上角的蓝色圆点。';
+        } else if (Math.hypot(x - 300, y - 200) <= 5) {
+            message = '这是中间的绿色圆点。';
+        } else if (Math.hypot(x - 500, y - 300) <= 5) {
+            message = '这是右下角的红色圆点。';
+        } else {
+            message = '点击了 Canvas 的其他位置。';
+        }
+
+        // 创建并显示提示窗口
+        createTooltip(x, y, message);
+    });
+
+    /**
+     * 监听页面的点击事件，点击非 Canvas 区域时移除提示窗口
+     */
+    document.addEventListener('click', (event) => {
+        // 如果点击的不是 Canvas，移除提示窗口
+        if (!canvas.contains(event.target)) {
+            removeTooltip();
+        }
+    });
+
+    /**
+     * 防止 Canvas 内部点击事件冒泡到 document，导致提示窗口立即移除
+     */
+    canvas.addEventListener('click', (event) => {
+        event.stopPropagation();
+    });
+</script>
+</body>
+</html>

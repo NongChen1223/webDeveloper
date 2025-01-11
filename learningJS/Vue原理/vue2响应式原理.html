@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+</head>
+
+<body>
+</body>
+<script>
+    // 1. 定义一个 Dep 类，用于管理订阅者
+    class Dep {
+        constructor() {
+            this.subscribers = []; // 存储所有的订阅者
+        }
+
+        // 添加订阅者
+        addSub(sub) {
+            this.subscribers.push(sub);
+        }
+
+        // 通知所有订阅者更新
+        notify() {
+            this.subscribers.forEach(sub => sub.update());
+        }
+    }
+
+    // 2. 定义一个函数，将数据转为响应式
+    function defineReactive(obj, key, val) {
+        const dep = new Dep(); // 为每个属性创建一个 Dep 实例，用于管理它的订阅者
+
+        Object.defineProperty(obj, key, {
+            get() {
+                if (Dep.target) {
+                    dep.addSub(Dep.target); // 如果 Dep.target 存在，说明当前有订阅者，添加它
+                }
+                console.log(`Getting ${key}: ${val}`);
+                return val;
+            },
+            set(newVal) {
+                if (newVal !== val) {
+                    console.log(`Setting ${key} to: ${newVal}`);
+                    val = newVal;
+                    dep.notify(); // 数据变化时，通知所有订阅者更新
+                }
+            }
+        });
+    }
+
+    // 3. 定义一个 Watcher 类，用于模拟 Vue 组件的订阅者
+    class Watcher {
+        constructor(vm, expOrFn, cb) {
+            this.vm = vm;
+            this.cb = cb;
+            this.expOrFn = expOrFn;
+            Dep.target = this; // 将当前 Watcher 实例赋值给 Dep.target
+            console.log("Dep.target:", Dep.target)
+            this.value = this.get(); // 获取初始值，触发 getter 收集依赖
+            console.log("this.value:", this.value)
+            Dep.target = null; // 获取值后，清空 Dep.target
+        }
+
+        // 执行 getter 方法，获取数据的值
+        get() {
+            return this.vm.data[this.expOrFn]; // 触发 getter
+        }
+
+        // 数据更新时，调用 update 方法
+        update() {
+            const newValue = this.vm.data[this.expOrFn]; // 获取新的值
+            this.cb(newValue); // 调用回调函数更新视图
+        }
+    }
+
+    // 4. 创建 Vue 实例并初始化数据
+    function Vue(options) {
+        this.data = options.data;
+        this.init();
+    }
+
+    Vue.prototype.init = function () {
+        // 遍历 data 对象，将每个属性转为响应式
+        for (let key in this.data) {
+            defineReactive(this.data, key, this.data[key]);
+        }
+    };
+
+    // 5. 创建 Vue 实例
+    const app = new Vue({
+        data: {
+            message: 'Hello Vue 2!' // 初始化数据
+        }
+    });
+
+    // 6. 创建一个 Watcher 实例，订阅 `message` 数据
+    new Watcher(app, 'message', (newVal) => {
+        console.log('Message changed:', newVal); // 视图更新时的回调
+    });
+
+    // 7. 访问 `message` 属性，触发 getter
+    // console.log('访问',app.data.message); // 获取数据，会触发 getter
+
+    // 8. 修改数据，触发 setter 并通知订阅者更新
+    // app.data.message = 'Hello Vue 3!'; // 修改数据，触发 setter
+
+</script>
+
+</html>

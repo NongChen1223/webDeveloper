@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+</head>
+
+<body>
+</body>
+<script>
+    // 创建一个 ref 函数，模拟 Vue 3 的响应式机制，底层使用 Proxy 实现
+    function ref(initialValue) {
+        // 内部的值
+        let _value = initialValue;
+
+        // 使用 Proxy 对象来代理数据
+        const proxy = new Proxy(
+            {
+                // 这是我们暴露给外部的对象，包含一个 value 属性
+                get value() {
+                    console.log('获取值：', _value); // 当访问 value 时，触发 get
+                    return _value;
+                },
+                set value(newValue) {
+                    console.log('设置新值：', newValue); // 当设置 value 时，触发 set
+                    _value = newValue; // 更新 _value 的值
+                }
+            },
+            {
+                // 在 Proxy 对象的 Handler 中，拦截 get 和 set 操作
+                get(target, prop) {
+                    if (prop === 'value') {
+                        console.log('访问属性 value');
+                        return target[prop]; // 访问 value 时，返回 _value
+                    }
+                    return undefined; // 如果访问其他属性，返回 undefined
+                },
+                set(target, prop, value) {
+                    if (prop === 'value') {
+                        console.log('修改属性 value 为', value);
+                        target[prop] = value; // 设置 value 的新值
+                        return true; // 返回 true 表示操作成功
+                    }
+                    return false; // 如果试图修改其他属性，返回 false
+                }
+            }
+        );
+
+        return proxy; // 返回通过 Proxy 代理的对象
+    }
+
+    // 创建响应式的数据对象
+    const count = ref(0);
+
+    // 读取值时触发 get 拦截器
+    console.log(count.value);  // 输出 '获取值： 0' 和 0
+
+    // 修改值时触发 set 拦截器
+    // count.value = 10;  // 输出 '设置新值： 10'
+
+    // 再次读取值，触发 get 拦截器
+    // console.log(count.value);  // 输出 '获取值： 10' 和 10
+
+
+</script>
+
+</html>
