@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>懒加载示例</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 0;
+            margin: 0;
+            background-color: #f4f4f4;
+        }
+        .content {
+
+            height: 1500px; /* 给页面增加一些高度，模拟滚动 */
+            padding: 20px;
+        }
+        .image-container {
+            margin: 20px 0;
+            text-align: center;
+
+        }
+        .image-container img{
+            width: 800px;
+            height: 600px;
+        }
+        .lazy {
+            width: 100%;
+            height: auto;
+            display: block;
+            background-color: #f3f3f3; /* 设置图片加载前的占位颜色 */
+        }
+    </style>
+</head>
+<body>
+
+<div class="content">
+    <h1>图片懒加载示例</h1>
+    <p>请向下滚动页面查看懒加载效果。图片将在滚动到可见区域时加载。</p>
+    <!-- 图片容器，每个容器里放一张图片 -->
+    <div class="image-container">
+        <img data-src="https://p3-xtjj-sign.byteimg.com/tos-cn-i-73owjymdk6/241b941d86014c6d8fa1a692a33cbe88~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAg56iL5bqP5ZGY5bCP5a-S:q75.awebp?rk3s=f64ab15b&x-expires=1739439788&x-signature=hjsN1dcTcbre6ytiajNJm4esnU0%3D" class="lazy" alt="图片1">
+    </div>
+    <div class="image-container">
+        <img data-src="https://p3-xtjj-sign.byteimg.com/tos-cn-i-73owjymdk6/241b941d86014c6d8fa1a692a33cbe88~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAg56iL5bqP5ZGY5bCP5a-S:q75.awebp?rk3s=f64ab15b&x-expires=1739439788&x-signature=hjsN1dcTcbre6ytiajNJm4esnU0%3D" class="lazy" alt="图片2">
+    </div>
+    <div class="image-container">
+        <img data-src="https://p3-xtjj-sign.byteimg.com/tos-cn-i-73owjymdk6/241b941d86014c6d8fa1a692a33cbe88~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAg56iL5bqP5ZGY5bCP5a-S:q75.awebp?rk3s=f64ab15b&x-expires=1739439788&x-signature=hjsN1dcTcbre6ytiajNJm4esnU0%3D" class="lazy" alt="图片3">
+    </div>
+    <div class="image-container">
+        <img data-src="https://p3-xtjj-sign.byteimg.com/tos-cn-i-73owjymdk6/241b941d86014c6d8fa1a692a33cbe88~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAg56iL5bqP5ZGY5bCP5a-S:q75.awebp?rk3s=f64ab15b&x-expires=1739439788&x-signature=hjsN1dcTcbre6ytiajNJm4esnU0%3D" class="lazy" alt="图片4">
+    </div>
+    <div class="image-container">
+        <img data-src="https://p3-xtjj-sign.byteimg.com/tos-cn-i-73owjymdk6/241b941d86014c6d8fa1a692a33cbe88~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAg56iL5bqP5ZGY5bCP5a-S:q75.awebp?rk3s=f64ab15b&x-expires=1739439788&x-signature=hjsN1dcTcbre6ytiajNJm4esnU0%3D" class="lazy" alt="图片5">
+    </div>
+</div>
+
+<script>
+    // 选择所有类名为 lazy 的图片元素
+    const lazyImages = document.querySelectorAll('.lazy');
+
+    // 检查浏览器是否支持 IntersectionObserver API
+    if ('IntersectionObserver' in window) {
+        console.log("支持 IntersectionObserver")
+        // 创建一个 IntersectionObserver 实例，监听图片是否进入视口
+        const observer = new IntersectionObserver((entries, observer) => {
+            console.log("打印 entries",entries[0].target.alt,entries[0].isIntersecting)
+            // 遍历所有被观察的元素
+            entries.forEach(entry => {
+                // 如果图片进入视口（用户可以看到该图片）
+                if (entry.isIntersecting) {
+                    const lazyImage = entry.target;
+                    setTimeout(()=>{
+                        // 设置真实的图片 URL，将 data-src 替换为 src，开始加载图片
+                        lazyImage.src = lazyImage.getAttribute('data-src');
+                        // 移除懒加载类（lazy），防止重复加载
+                        lazyImage.classList.remove('lazy');
+                        // 停止观察已经加载的图片
+                        // observer.unobserve(lazyImage);
+                    },500)
+                }
+            });
+        });
+
+        // 观察每一张图片
+        lazyImages.forEach(image => {
+            console.log("打印 lazyImages item",image)
+            observer.observe(image);
+        });
+    } else {
+        console.log("不支持 IntersectionObserver")
+        // 如果浏览器不支持 IntersectionObserver，可以采用传统方式：立即加载所有图片
+        lazyImages.forEach(image => {
+            image.src = image.getAttribute('data-src');
+            image.classList.remove('lazy');
+        });
+    }
+</script>
+
+</body>
+</html>
