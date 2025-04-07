@@ -9,8 +9,7 @@
     "allowImportingTsExtensions": true,  
     "resolveJsonModule": true,  
     "isolatedModules": true,  
-    "noEmit": true,  
-    "jsx": "preserve",  
+    "noEmit": true,
     "strict": true,  
     "noUnusedLocals": true,  
     "noUnusedParameters": true,  
@@ -18,7 +17,12 @@
     "baseUrl": ".",  
     "paths": {  
       "@/*": ["./src/*"]  
-    }  
+    },
+    "jsx": "preserve",
+    "jsxFactory": "h",
+    "jsxFragmentFactory": "Fragment",
+    "types": ["vite/client"], // 可选，增强类型提示
+    "jsxImportSource": "vue"
   },  
   "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"],  
   "references": [{ "path": "./tsconfig.node.json" }]  

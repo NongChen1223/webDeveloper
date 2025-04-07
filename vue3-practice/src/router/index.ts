@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router' 
-import HomeView from '../views/HomeView.vue'  
-  
-const router = createRouter({  
+import HomeView from '../views/HomeView.vue'
+import TsxPage from '../views/testTsx.tsx'
+const router = createRouter({
   history: createWebHistory(),  
   routes: [  
     {  
@@ -13,7 +13,12 @@ const router = createRouter({
       path: '/about',  
       name: 'about',  
       component: () => import('../views/AboutView.vue')  
-    }  
+    },
+    {
+      path: '/test',
+      name: 'test',
+      component:TsxPage
+    }
   ]  
 })  
   
